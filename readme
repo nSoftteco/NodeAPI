@@ -1,0 +1,29 @@
+------------------------------------------------------------------
+#commands for run server
+------------------------------------------------------------------
+    mongod --dbpath <path>
+
+    node test/auth.js
+
+    node server.js
+
+For tests use: httpie
+
+------------------------------------------------------------------
+#check post/get/put/delete requests
+------------------------------------------------------------------
+http POST http://localhost:1337/api/articles title=TestArticle author='John Doe' description='lorem ipsum dolar sit amet' images:='[{"kind":"thumbnail", "url":"http://habrahabr.ru/images/write-topic.png"}, {"kind":"detail", "url":"http://habrahabr.ru/images/write-topic.png"}]'
+http http://localhost:1337/api/articles
+http http://localhost:1337/api/articles/52306b6a0df1064e9d000003
+http PUT http://localhost:1337/api/articles/52306b6a0df1064e9d000003 title=TestArticle2 author='John Doe' description='lorem ipsum dolar sit amet' images:='[{"kind":"thumbnail", "url":"http://habrahabr.ru/images/write-topic.png"}, {"kind":"detail", "url":"http://habrahabr.ru/images/write-topic.png"}]'
+http DELETE http://localhost:1337/api/articles/52306b6a0df1064e9d000003
+
+------------------------------------------------------------------
+# add new users and check authorization
+------------------------------------------------------------------
+#command: node test/auth.js
+
+#CHECK AUTHORIZATION
+http POST http://localhost:1337/oauth/token grant_type=password client_id=mobileV1 client_secret=1234567 username=nikolai password=password
+http POST http://localhost:1337/oauth/token grant_type=refresh_token client_id=mobileV1 client_secret=abc123456 refresh_token=TOKEN
+http http://localhost:1337/api/userinfo Authorization:'Bearer TOKEN'
