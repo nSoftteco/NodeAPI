@@ -1,46 +1,65 @@
 var express         = require('express');
-var path            = require('path'); // модуль для парсинга пути
+var path            = require('path');
 var favicon         = require('serve-favicon');
 var morgan          = require('morgan');
 var bodyParser      = require('body-parser');
 var methodOverride  = require('method-override');
 var log             = require('./libs/log')(module);
 var config          = require('./libs/config');
-var passport            = require('passport');
+var passport        = require('passport');
 var oauth2          = require('./libs/oauth2');
 var oauth           = require('./libs/oauth');
-var ArticleModel   = require('./libs/mongoose').ArticleModel;
+var ArticleModel    = require('./libs/mongoose').ArticleModel;
 var router = express.Router();
 
 var app = express();
 
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
 app.use(passport.initialize());
 
-app.use(favicon(__dirname + "/public/favicon.png")); // отдаем стандартную фавиконку, можем здесь же свою задать
-app.use(morgan('dev')); // выводим все запросы со статусами в консоль
-app.use(bodyParser.json()); // стандартный модуль, для парсинга JSON в запросах
-app.use(methodOverride()); // поддержка put и delete
-app.use(router); // модуль для простого задания обработчиков путей
-app.use(express.static(path.join(__dirname, "public"))); // запуск статического файлового сервера, который смотрит на папку public/ (в нашем случае отдает index.html)
+app.use(favicon(__dirname + "/public/favicon.png"));
+app.use(morgan('dev'));
+app.use(bodyParser.json());
+app.use(methodOverride());
+app.use(router);
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get('/login', function(req, res) {
+    res.render('index');
+});
+
+app.post('/login', function(req, res) {
+    console.log("username:" + req.body.username);
+});
+
+//
+//app.get('/loginFailure', function(req, res, next) {
+//    res.send('Failed to authenticate');
+//});
+//
+//app.get('/loginSuccess', function(req, res, next) {
+//    res.send('Successfully authenticated');
+//});
 
 app.post('/oauth/token', oauth2.token);
 app.get('/api/userInfo',
     passport.authenticate('bearer', { session: false }),
     function(req, res) {
-        // req.authInfo is set using the `info` argument supplied by
-        // `BearerStrategy`.  It is typically used to indicate scope of the token,
-        // and used in access control checks.  For illustrative purposes, this
-        // example simply returns the scope in the response.
         res.json({ user_id: req.user.userId, name: req.user.username, scope: req.authInfo.scope })
     }
 );
 
+app.get('/', function(req, res){
+    res.redirect('/login');
+});
+
 app.get('/api', function (req, res) {
-    res.send('API is running');
+    res.send("API Running");
 });
 
 app.get('/api/articles', function(req, res) {
-    //res.send('This is not implemented now');
     return ArticleModel.find(function(err, articles) {
         if (!err) {
             return res.send(articles);
@@ -81,7 +100,6 @@ app.post('/api/articles', function(req, res) {
 });
 
 app.get('/api/articles/:id', function(req, res) {
-    //res.send('This is not implemented now');
     return ArticleModel.findById(req.params.id, function (err, article) {
         if(!article) {
             res.statusCode = 404;
