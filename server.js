@@ -14,6 +14,15 @@ var router = express.Router();
 
 var app = express();
 
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+// parse application/vnd.api+json as json
+app.use(bodyParser.json({ type: 'application/vnd.api+json' }));
+
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
@@ -31,16 +40,11 @@ app.get('/login', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-    //console.log("username:" + req.post("username1"));
-    var body = "";
-    req.on('data', function (chunk) {
-        body += chunk;
-    });
-    req.on('end', function () {
-        console.log('POSTed: ' + body);
-        res.writeHead(200);
-        res.end(body);
-    });
+    console.log("userName: " + req.body.username);
+    console.log("userName: " + req.body.password);
+    res.writeHead(200);
+    res.end("userName: " + req.body.username + "\n" +
+        "password: " + req.body.password);
 });
 
 //
