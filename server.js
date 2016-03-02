@@ -42,9 +42,27 @@ app.get('/login', function(req, res) {
 app.post('/login', function(req, res) {
     console.log("userName: " + req.body.username);
     console.log("userName: " + req.body.password);
-    res.writeHead(200);
-    res.end("userName: " + req.body.username + "\n" +
-        "password: " + req.body.password);
+
+    var request = require('request');
+
+    request.post(
+        'http://localhost:1337/oauth/token',
+        { form: {
+            grant_type: 'password',
+            client_id: 'mobileV1',
+            client_secret: '1234567',
+            username: req.body.username,
+            password: req.body.password
+        } },
+        function (error, response, body) {
+            console.log("boby: " + body);
+            if (!error && response.statusCode == 200) {
+                console.log(body);
+            }
+            res.writeHead(200);
+            res.end(body);
+        }
+    );
 });
 
 //
