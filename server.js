@@ -31,7 +31,16 @@ app.get('/login', function(req, res) {
 });
 
 app.post('/login', function(req, res) {
-    console.log("username:" + req.body.username);
+    //console.log("username:" + req.post("username1"));
+    var body = "";
+    req.on('data', function (chunk) {
+        body += chunk;
+    });
+    req.on('end', function () {
+        console.log('POSTed: ' + body);
+        res.writeHead(200);
+        res.end(body);
+    });
 });
 
 //
